@@ -1,0 +1,818 @@
+/* ============================================================
+   DESIGN TOKENS: RICK OWENS / INDUSTRIAL METAL
+   ============================================================ */
+:root {
+  --color-void: #050505;        /* 深淵黑 */
+  --color-steel: #1a1a1a;       /* 暗鋼色 */
+  --color-raw-iron: #333333;    /* 鑄鐵灰 */
+  --color-titanium: #a8a8a8;    /* 鈦金屬白 */
+  --color-zinc-light: #f5f5f5;  /* 鋅板強光 */
+  --color-warning-red: #ff3344; /* 系統警告紅 */
+
+  --ghost-iron: rgba(168, 168, 168, 0.09);   /* 鬼影描邊：鈦金屬 */
+  --ghost-red: rgba(255, 51, 68, 0.14);      /* 鬼影描邊：警告紅 */
+
+  --font-display: 'Syne', sans-serif;
+  --font-mono: 'IBM Plex Mono', monospace;
+  --font-body: 'Inter', sans-serif;
+  --font-chinese: 'Noto Serif TC', serif;
+
+  --header-height: 88px;
+  --edge-pad: clamp(20px, 4vw, 60px);
+  --section-gap: clamp(70px, 14vh, 200px);
+}
+
+/* ============================================================
+   100% 鋼骨直角客製滾動條 (整合相容性與無漸變機械感)
+   ============================================================ */
+/* Firefox */
+html {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-raw-iron) var(--color-void);
+  scroll-behavior: smooth;
+}
+
+/* Chrome, Safari, Edge, Opera */
+::-webkit-scrollbar {
+  width: 6px;  /* 垂直滾動條 */
+  height: 6px; /* 水平滾動條 */
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-void);
+  border-left: 1px solid var(--color-raw-iron);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-raw-iron);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-warning-red); /* 瞬間激發警告紅，取消過渡展現極致機械感 */
+}
+
+/* 重設與全域樣式 */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  border-radius: 0 !important; /* 核心：100% 絕對直角，拒絕任何圓角 */
+}
+
+body {
+  background-color: var(--color-void);
+  color: var(--color-titanium);
+  font-family: var(--font-body);
+  overflow-x: hidden;
+  line-height: 1.6;
+}
+
+/* 3D 背景畫布 */
+#bg-canvas {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: -2;
+}
+
+/* 鐵網覆蓋層（掃描線與顆粒感） */
+.iron-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%),
+              linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
+  background-size: 100% 4px, 6px 100%;
+  z-index: -1;
+  pointer-events: none;
+  opacity: 0.4;
+}
+
+/* ---------- 頂部系統列（固定於頂端，維持冷靜、不參與跳字節奏） ---------- */
+.terminal-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: var(--header-height);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 var(--edge-pad);
+  border-bottom: 1px solid transparent;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 2px;
+  z-index: 90;
+  transition: border-color 0.4s ease, background-color 0.4s ease, backdrop-filter 0.4s ease;
+}
+
+.terminal-header.is-scrolled {
+  border-bottom-color: var(--color-raw-iron);
+  background-color: rgba(5, 5, 5, 0.55);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+
+.brand {
+  font-weight: 500;
+  color: var(--color-zinc-light);
+}
+
+.system-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.pulse-indicator {
+  width: 6px;
+  height: 6px;
+  background-color: var(--color-warning-red);
+  box-shadow: 0 0 8px var(--color-warning-red);
+  animation: pulse 2s infinite;
+  flex-shrink: 0;
+}
+
+@keyframes pulse {
+  0% { opacity: 0.3; }
+  50% { opacity: 1; }
+  100% { opacity: 0.3; }
+}
+
+/* 視口排版 */
+.viewport {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 var(--edge-pad);
+  position: relative;
+  border-left: 1px solid var(--color-steel);
+  border-right: 1px solid var(--color-steel);
+}
+
+/* 通用：捲動淡入區塊 */
+[data-reveal] {
+  opacity: 0;
+  transform: translateY(48px);
+  transition: opacity 1s cubic-bezier(0.16, 1, 0.3, 1), transform 1s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+[data-reveal].is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+[data-reveal-child] {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.9s cubic-bezier(0.16, 1, 0.3, 1), transform 0.9s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+[data-reveal].is-visible [data-reveal-child] {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+[data-reveal].is-visible [data-reveal-child]:nth-of-type(1) { transition-delay: 0.05s; }
+[data-reveal].is-visible [data-reveal-child]:nth-of-type(2) { transition-delay: 0.2s; }
+[data-reveal].is-visible [data-reveal-child]:nth-of-type(3) { transition-delay: 0.35s; }
+
+@media (prefers-reduced-motion: reduce) {
+  [data-reveal], [data-reveal-child] {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
+}
+
+/* 小型章節眉標 */
+.section-eyebrow {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 3px;
+  color: var(--color-raw-iron);
+  padding-left: 20px;
+  position: relative;
+  margin-bottom: 24px;
+}
+
+.section-eyebrow::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 12px;
+  height: 1px;
+  background-color: var(--color-warning-red);
+}
+
+/* ============================================================
+   HERO — 非對稱切割：巨型姓名靠左偏下，直排側標，鬼影疊字
+   ============================================================ */
+.hero-section {
+  position: relative;
+  min-height: 100vh;
+  min-height: 100svh;
+  padding-top: var(--header-height);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  overflow: hidden;
+}
+
+.hero-ghost {
+  position: absolute;
+  top: 6%;
+  right: -4%;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: clamp(9rem, 26vw, 28rem);
+  line-height: 1;
+  color: transparent;
+  -webkit-text-stroke: 1px var(--ghost-iron);
+  transform: rotate(-7deg);
+  z-index: 0;
+  pointer-events: none;
+  user-select: none;
+  white-space: nowrap;
+  mix-blend-mode: exclusion;
+}
+
+.hero-grid {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  column-gap: 20px;
+  align-items: end;
+  flex-grow: 1;
+  padding-top: 4vh;
+  padding-bottom: 3vh;
+}
+
+.artist-name {
+  grid-column: 1 / 10;
+  font-family: var(--font-display);
+  font-size: clamp(5.5rem, 14vw, 13rem);
+  font-weight: 800;
+  line-height: 0.82;
+  color: var(--color-zinc-light);
+  letter-spacing: -4px;
+  margin-left: -0.04em;
+}
+
+.hero-side {
+  grid-column: 10 / 13;
+  justify-self: end;
+  display: flex;
+  align-items: flex-end;
+  gap: 14px;
+  height: 100%;
+  padding-bottom: 0.4em;
+}
+
+.hero-idx {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--color-warning-red);
+  letter-spacing: 2px;
+  writing-mode: vertical-rl;
+}
+
+.hero-tag {
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  letter-spacing: 5px;
+  color: var(--color-titanium);
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  white-space: nowrap;
+}
+
+.scroll-cue {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding-bottom: 4vh;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 3px;
+  color: var(--color-raw-iron);
+}
+
+.cue-line {
+  display: block;
+  width: 1px;
+  height: 40px;
+  background: linear-gradient(var(--color-warning-red), transparent);
+  animation: cue-drop 2s ease-in-out infinite;
+}
+
+@keyframes cue-drop {
+  0% { transform: scaleY(0); transform-origin: top; opacity: 0.8; }
+  50% { transform: scaleY(1); transform-origin: top; opacity: 1; }
+  51% { transform-origin: bottom; }
+  100% { transform: scaleY(0); transform-origin: bottom; opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cue-line { animation: none; height: 24px; opacity: 0.6; }
+}
+
+/* ============================================================
+   宣言 — 階梯式跳字級，巨型鬼影引號
+   ============================================================ */
+.manifesto-section {
+  position: relative;
+  padding: var(--section-gap) 0;
+  border-top: 1px solid var(--color-raw-iron);
+  overflow: hidden;
+}
+
+.quote-ghost {
+  position: absolute;
+  top: -0.3em;
+  left: -0.06em;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: clamp(12rem, 30vw, 32rem);
+  line-height: 1;
+  color: transparent;
+  -webkit-text-stroke: 1px var(--ghost-red);
+  z-index: 0;
+  pointer-events: none;
+  user-select: none;
+  mix-blend-mode: exclusion; /* 在 3D 背景之上產生高級金屬反差 */
+}
+
+.manifesto-line {
+  position: relative;
+  z-index: 1;
+  font-family: var(--font-chinese), var(--font-display);
+  font-weight: 900; /* 使用最粗的字重展現鋼骨感 */
+  color: var(--color-zinc-light);
+  letter-spacing: -1px;
+  max-width: 900px;
+}
+
+.manifesto-line--a {
+  font-size: clamp(1.6rem, 3.6vw, 2.8rem);
+  margin-left: 0;
+}
+
+.manifesto-line--b {
+  font-size: clamp(2.6rem, 6.4vw, 5.2rem);
+  margin-left: clamp(30px, 12vw, 180px);
+  margin-top: 0.15em;
+}
+
+/* ============================================================
+   專案索引 — 三行三種版面，拒絕模板複製
+   ============================================================ */
+.archive-matrix {
+  padding-bottom: var(--section-gap);
+}
+
+.matrix-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 30px;
+  gap: 20px;
+}
+
+.matrix-title {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  color: var(--color-raw-iron);
+  letter-spacing: 2px;
+}
+
+.matrix-count {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--color-raw-iron);
+  letter-spacing: 1px;
+  white-space: nowrap;
+}
+
+.matrix-table {
+  border-top: 1px solid var(--color-raw-iron);
+}
+
+/* 共用列基礎：邊框、拉絲鋼折射掃光、hover 過場 */
+.matrix-row {
+  position: relative;
+  display: block;
+  overflow: hidden;
+  border-bottom: 1px solid var(--color-raw-iron);
+  text-decoration: none;
+  color: inherit;
+  background-color: rgba(5, 5, 5, 0.45);
+  transition: background-color 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.matrix-row::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.05) 30%,
+    rgba(255, 255, 255, 0.1) 50%,
+    rgba(255, 255, 255, 0.05) 70%,
+    transparent
+  );
+  /* 優化：將鋼板掃光過渡改為貝茲曲線，讓閃光瞬間橫掃，隨後極致減速 */
+  transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  pointer-events: none;
+  z-index: 2;
+}
+
+.matrix-row:hover::before {
+  left: 100%;
+}
+
+.matrix-row:hover {
+  background-color: rgba(26, 26, 26, 0.7);
+}
+
+.row-ghost-num {
+  position: absolute;
+  font-family: var(--font-display);
+  font-weight: 800;
+  color: transparent;
+  -webkit-text-stroke: 1px var(--ghost-iron);
+  line-height: 1;
+  z-index: 0;
+  pointer-events: none;
+  user-select: none;
+  transition: -webkit-text-stroke-color 0.4s ease;
+  mix-blend-mode: exclusion; /* 在 3D 背景之上產生高級金屬反差 */
+}
+
+.matrix-row:hover .row-ghost-num {
+  -webkit-text-stroke-color: var(--ghost-red);
+}
+
+.row-head {
+  position: relative;
+  z-index: 1;
+}
+
+.col-num {
+  font-family: var(--font-mono);
+  color: var(--color-warning-red);
+  font-size: 0.85rem;
+  letter-spacing: 1px;
+}
+
+.row-head h3 {
+  font-family: var(--font-display);
+  letter-spacing: -0.5px;
+  margin: 6px 0;
+}
+
+.tech-tag {
+  position: relative;
+  z-index: 1;
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--color-raw-iron);
+  text-transform: uppercase;
+  transition: color 0.4s ease;
+}
+
+.matrix-row:hover .tech-tag {
+  color: var(--color-titanium);
+}
+
+.col-desc {
+  position: relative;
+  z-index: 1;
+  font-family: var(--font-chinese), var(--font-body);
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: #8a8a8a; /* 優化：調亮預設暗灰色，大幅改善背景 Canvas 干擾下的易讀性 */
+  transition: color 0.4s ease;
+}
+
+.matrix-row:hover .col-desc {
+  color: var(--color-zinc-light);
+}
+
+.col-action {
+  position: relative;
+  z-index: 1;
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--color-raw-iron);
+  letter-spacing: 1px;
+  transition: color 0.4s ease, transform 0.4s ease;
+}
+
+.matrix-row:hover .col-action {
+  color: var(--color-zinc-light);
+  transform: translateX(6px);
+}
+
+/* ---- ROW A：標準靠左，鬼影數字沉在標題後方 ---- */
+.matrix-row--a {
+  display: grid;
+  grid-template-columns: 1fr 300px;
+  grid-template-areas:
+    "head   action"
+    "desc   action";
+  align-items: center;
+  column-gap: 30px;
+  padding: 58px var(--edge-pad) 58px calc(var(--edge-pad) + 70px);
+}
+
+.matrix-row--a .row-ghost-num {
+  top: 50%;
+  left: 0;
+  transform: translateY(-50%);
+  font-size: clamp(4rem, 9vw, 8rem);
+}
+
+.matrix-row--a .row-head { grid-area: head; }
+
+.matrix-row--a .col-desc {
+  grid-area: desc;
+  padding-right: 20px;
+}
+
+.matrix-row--a .col-action {
+  grid-area: action;
+  align-self: center;
+  text-align: right;
+  justify-self: end;
+}
+
+/* ---- ROW B：鏡射靠右，動作標籤反轉到左側 ---- */
+.matrix-row--b {
+  display: grid;
+  grid-template-columns: 160px 1fr;
+  grid-template-areas:
+    "action head"
+    "action desc";
+  align-items: center;
+  column-gap: 30px;
+  padding: 58px calc(var(--edge-pad) + 70px) 58px var(--edge-pad);
+  text-align: right;
+}
+
+.matrix-row--b .row-ghost-num {
+  top: 50%;
+  right: 0;
+  left: auto;
+  transform: translateY(-50%);
+  font-size: clamp(4rem, 9vw, 8rem);
+}
+
+.matrix-row--b .col-action {
+  grid-area: action;
+  align-self: center;
+  text-align: left;
+  color: var(--color-raw-iron);
+}
+
+.matrix-row--b .row-head {
+  grid-area: head;
+}
+
+.matrix-row--b .col-desc {
+  grid-area: desc;
+  margin-left: auto;
+  max-width: 640px;
+}
+
+.matrix-row--b .tech-tag {
+  direction: ltr;
+}
+
+/* ---- ROW C：終章巨型堆疊，標題跨滿版 ---- */
+.matrix-row--c {
+  padding: 70px var(--edge-pad) 64px;
+}
+
+.matrix-row--c .row-ghost-num {
+  top: 10px;
+  right: var(--edge-pad);
+  font-size: clamp(6rem, 14vw, 13rem);
+  transform: rotate(-4deg);
+}
+
+.matrix-row--c .row-head {
+  display: flex;
+  align-items: baseline;
+  gap: 18px;
+  flex-wrap: wrap;
+}
+
+.matrix-row--c .row-head h3 {
+  font-size: clamp(2.2rem, 5vw, 3.6rem);
+  letter-spacing: -1px;
+}
+
+.matrix-row--c .tech-tag {
+  margin: 10px 0 22px;
+}
+
+.matrix-row--c .col-desc {
+  max-width: 640px;
+  margin-bottom: 26px;
+}
+
+/* ---------- 底部資訊列 ---------- */
+.terminal-footer {
+  position: relative;
+  border-top: 1px solid var(--color-raw-iron);
+  padding: 64px 0 50px;
+  font-family: var(--font-mono);
+  overflow: hidden;
+}
+
+.mail-ghost {
+  position: absolute;
+  bottom: -0.35em;
+  left: -0.05em;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: clamp(10rem, 24vw, 24rem);
+  line-height: 1;
+  color: transparent;
+  -webkit-text-stroke: 1px var(--ghost-iron);
+  z-index: 0;
+  pointer-events: none;
+  user-select: none;
+  mix-blend-mode: exclusion; /* 在 3D 背景之上產生高級金屬反差 */
+}
+
+.footer-top {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  margin-bottom: 60px;
+}
+
+.footer-top .section-eyebrow {
+  margin-bottom: 0;
+}
+
+.footer-mail {
+  font-family: var(--font-display);
+  font-size: clamp(1.8rem, 4.6vw, 3.4rem);
+  font-weight: 700;
+  color: var(--color-zinc-light);
+  text-decoration: none;
+  letter-spacing: -1px;
+  transition: color 0.3s;
+  width: fit-content;
+}
+
+.footer-mail:hover {
+  color: var(--color-warning-red);
+}
+
+.footer-bottom {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  font-size: 0.75rem;
+  gap: 20px;
+}
+
+.footer-meta {
+  color: var(--color-raw-iron);
+  letter-spacing: 1px;
+}
+
+.footer-links {
+  display: flex;
+  flex-direction: row;
+  gap: 24px;
+}
+
+.footer-link {
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  color: var(--color-raw-iron);
+  text-decoration: none;
+  letter-spacing: 2px;
+  transition: color 0.3s;
+}
+
+.footer-link:hover {
+  color: var(--color-zinc-light);
+}
+
+/* RWD 響應式：縮小視窗與行動端優化 */
+@media (max-width: 1024px) {
+  .hero-section {
+    min-height: auto;
+    padding-bottom: 20px;
+  }
+}
+
+@media (max-width: 900px) {
+  :root {
+    --header-height: 72px;
+  }
+
+  .hero-ghost, .quote-ghost, .row-ghost-num, .mail-ghost {
+    display: none !important;
+  }
+
+  .hero-grid {
+    display: block;
+    min-height: auto;
+    padding-top: 20px;
+    padding-bottom: 4vh;
+  }
+
+  .artist-name {
+    margin-left: 0;
+  }
+
+  .hero-side {
+    margin-top: 28px;
+    justify-content: flex-start;
+  }
+
+  .hero-idx,
+  .hero-tag {
+    writing-mode: horizontal-tb;
+  }
+
+  .manifesto-line--a,
+  .manifesto-line--b {
+    margin-left: 0;
+  }
+
+  .matrix-row--a,
+  .matrix-row--b {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    text-align: left;
+    padding: 32px 16px;
+    gap: 14px;
+  }
+
+  .matrix-row--b .row-head {
+    order: 1;
+  }
+
+  .matrix-row--b .col-desc {
+    order: 2;
+    margin-left: 0;
+    max-width: 100%;
+  }
+
+  .matrix-row--b .col-action {
+    order: 3;
+  }
+
+  .matrix-row--a .col-action,
+  .matrix-row--b .col-action {
+    text-align: left;
+    justify-self: start;
+  }
+
+  .matrix-row--c {
+    padding: 32px 16px;
+  }
+
+  .footer-bottom {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 20px;
+  }
+
+  .footer-links {
+    flex-direction: row;
+  }
+
+  .footer-link {
+    writing-mode: horizontal-tb;
+  }
+}

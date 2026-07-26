@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>ZEN_LAB ｜ ARCHIVE</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500&family=Inter:wght@300;400;600&family=Noto+Serif+TC:wght@600;900&family=Syne:wght@700;800&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <canvas id="bg-canvas"></canvas>
+
+  <div class="iron-overlay"></div>
+
+  <header class="terminal-header" id="site-header">
+    <div class="brand">
+      <span class="logo-symbol">//</span>
+      <span class="logo-text">ZEN SYSTEM</span>
+    </div>
+    <div class="system-status">
+      <span class="pulse-indicator"></span>
+      <span class="status-code" id="status-ticker">M_STATUS: ACTIVE [2026]</span>
+    </div>
+  </header>
+
+  <div class="viewport">
+
+    <!-- ============ HERO：非對稱切割，巨型鬼影字疊加 ============ -->
+    <section class="hero-section" data-reveal>
+      <span class="hero-ghost" aria-hidden="true">ZEN</span>
+
+      <div class="hero-grid">
+        <h1 class="artist-name" data-reveal-child>ZEN</h1>
+        <div class="hero-side" data-reveal-child>
+          <span class="hero-idx">IDX.00 —</span>
+          <span class="hero-tag">CREATIVE DEVELOPER</span>
+        </div>
+      </div>
+
+      <div class="scroll-cue" data-reveal-child>
+        <i class="cue-line"></i>
+        <span>SCROLL</span>
+      </div>
+    </section>
+
+    <!-- ============ 宣言：階梯式跳字級，巨型鬼影引號 ============ -->
+    <section class="manifesto-section" data-reveal>
+      <span class="quote-ghost" aria-hidden="true">”</span>
+      <span class="section-eyebrow">M_LOG // 宣言</span>
+      <p class="manifesto-line manifesto-line--a" data-reveal-child>於數位虛無之中，</p>
+      <p class="manifesto-line manifesto-line--b" data-reveal-child>砌造異質空間的無限形態。</p>
+    </section>
+
+    <!-- ============ 三種不同的版面處理 ============ -->
+    <section class="archive-matrix">
+      <div class="matrix-heading" data-reveal>
+        <h2 class="matrix-title">PROJECT_ARCHIVE // 專案索引</h2>
+        <span class="matrix-count">[ 03 ENTRIES ]</span>
+      </div>
+
+      <div class="matrix-table">
+
+        <!-- ROW A — 標準靠左，鬼影數字置底 -->
+        <a href="https://zen-lab.onrender.com" class="matrix-row matrix-row--a" target="_blank" data-reveal>
+          <span class="row-ghost-num" aria-hidden="true">01</span>
+          <div class="row-head">
+            <span class="col-num">01/</span>
+            <h3>ZEN SEED</h3>
+            <span class="tech-tag">WebGL / PHP / Organic-Tech</span>
+          </div>
+          <p class="col-desc">探討肉體擴充與自我重塑，透過頻率將意識導入數位硬體的生化介面。</p>
+          <span class="col-action">ENTER_SYSTEM ➔</span>
+        </a>
+
+        <!-- ROW B — 鏡射靠右，動作標籤移到左側 -->
+        <a href="https://ff85611-bot.github.io/Mirror-Hall/" class="matrix-row matrix-row--b" target="_blank" data-reveal>
+          <span class="row-ghost-num" aria-hidden="true">02</span>
+          <span class="col-action">DECRYPT_DEPTH ➔</span>
+          <div class="row-head">
+            <span class="col-num">02/</span>
+            <h3>Mirror Hall</h3>
+            <span class="tech-tag">Three.js / Custom GLSL / Raymarching</span>
+          </div>
+          <p class="col-desc">深淵流體與光電脈衝交織，於鏡像異境中展開的沉浸視覺體驗。</p>
+        </a>
+
+        <!-- ROW C — 巨型堆疊終章，標題跨滿版 -->
+        <a href="https://ff85611-bot.github.io/brutalBuilding/" class="matrix-row matrix-row--c" target="_blank" data-reveal>
+          <span class="row-ghost-num" aria-hidden="true">03</span>
+          <div class="row-head">
+            <span class="col-num">03/</span>
+            <h3>brutalBuilding</h3>
+          </div>
+          <span class="tech-tag">Three.js / Procedural 3D / Pointer Lock</span>
+          <p class="col-desc">無限隨機構築的巨石異境，於濃霧與風雪間尋找沉浸式的孤獨空間。</p>
+          <span class="col-action">ENTER_SANCTUARY ➔</span>
+        </a>
+
+      </div>
+    </section>
+
+    <!-- ============ Footer：巨型鬼影 @，直排連結側標 ============ -->
+    <footer class="terminal-footer" data-reveal>
+      <span class="mail-ghost" aria-hidden="true">@</span>
+      <div class="footer-top">
+        <span class="section-eyebrow">TRANSMISSION // 聯絡通道</span>
+        <a href="mailto:ff85611@gmail.com" class="footer-mail">ff85611@gmail.com</a>
+      </div>
+      <div class="footer-bottom">
+        <span class="footer-meta" id="clock-ticker">TAIPEI // --:--:--</span>
+        <div class="footer-links">
+          <a href="這裡填入GitHub" target="_blank" class="footer-link">GITHUB</a>
+          <a href="這裡填入履歷PDF" target="_blank" class="footer-link">SPEC_PDF</a>
+        </div>
+      </div>
+    </footer>
+
+  </div>
+
+  <!-- 核心版面互動（淡入、頂部列、時鐘）獨立於下方 three.js 模組，
+       即使 CDN 被瀏覽器擋下也不影響版面內容顯示 -->
+  <noscript>
+    <style>
+      [data-reveal], [data-reveal-child] { opacity: 1 !important; transform: none !important; }
+    </style>
+  </noscript>
+  <script>
+    (function () {
+      // ---------- 捲動淡入（區塊進場） ----------
+      var revealTargets = document.querySelectorAll('[data-reveal]');
+      if ('IntersectionObserver' in window && revealTargets.length) {
+        var revealObserver = new IntersectionObserver(function (entries, observer) {
+          entries.forEach(function (entry) {
+            if (entry.isIntersecting) {
+              entry.target.classList.add('is-visible');
+              observer.unobserve(entry.target);
+            }
+          });
+        }, { threshold: 0.16, rootMargin: '0px 0px -8% 0px' });
+
+        revealTargets.forEach(function (el) { revealObserver.observe(el); });
+      } else {
+        revealTargets.forEach(function (el) { el.classList.add('is-visible'); });
+      }
+
+      // ---------- 頂部系統列：捲動時淡入背板 ----------
+      var siteHeader = document.getElementById('site-header');
+      if (siteHeader) {
+        var updateHeaderState = function () {
+          siteHeader.classList.toggle('is-scrolled', window.scrollY > 12);
+        };
+        updateHeaderState();
+        window.addEventListener('scroll', updateHeaderState, { passive: true });
+      }
+
+      // ---------- 終端機讀數：台北時間即時 Ticker ----------
+      var clockTicker = document.getElementById('clock-ticker');
+      if (clockTicker) {
+        var updateClock = function () {
+          var now = new Date();
+          var timeStr = new Intl.DateTimeFormat('en-GB', {
+            timeZone: 'Asia/Taipei',
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit',
+            hour12: false
+          }).format(now);
+          clockTicker.textContent = 'TAIPEI // ' + timeStr;
+        };
+        updateClock();
+        setInterval(updateClock, 1000);
+      }
+    })();
+  </script>
+
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+      "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+    }
+  }
+  </script>
+  <script type="module" src="app.js"></script>
+</body>
+</html>
