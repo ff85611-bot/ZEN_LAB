@@ -360,7 +360,7 @@ body {
   font-weight: 900; /* 使用最粗的字重展現鋼骨感 */
   color: var(--color-zinc-light);
   letter-spacing: -1px;
-  max-width: 900px;
+  max-width: 100%;
 }
 
 .manifesto-line--a {
@@ -369,9 +369,10 @@ body {
 }
 
 .manifesto-line--b {
-  font-size: clamp(2.6rem, 6.4vw, 5.2rem);
-  margin-left: clamp(30px, 12vw, 180px);
+  font-size: clamp(2.2rem, 5.2vw, 4.2rem); /* 將上限從 5.2rem 降至 4.2rem */
+  margin-left: clamp(20px, 8vw, 120px);    /* 稍微收緊左邊界，留更多寬度給文字 */
   margin-top: 0.15em;
+  white-space: nowrap;
 }
 
 /* ============================================================
