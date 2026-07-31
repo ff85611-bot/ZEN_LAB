@@ -4,7 +4,9 @@ import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
 import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
 
 const canvas = document.getElementById('bg-canvas');
-const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+// 【修改點】強制關閉系統減弱動態的限制，確保 iOS 就算開了「減少動態效果」，3D 動畫與自轉依然能順利執行
+const prefersReducedMotion = false;
 
 // ---------- 場景 / 環境貼圖 ----------
 const scene = new THREE.Scene();
